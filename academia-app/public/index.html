@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e1116">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Academia Pro</title>
+</head>
+<body>
+  <main id="app">
+    <section id="view-hoje" class="view" aria-label="Hoje"></section>
+    <section id="view-esteira" class="view" aria-label="Esteira"></section>
+    <section id="view-comida" class="view" aria-label="Comida"></section>
+    <section id="view-treino" class="view" aria-label="Treino"></section>
+    <section id="view-perfil" class="view" aria-label="Perfil"></section>
+  </main>
+
+  <nav id="tabs" aria-label="Navegação">
+    <button data-view="hoje" aria-label="Hoje"><span aria-hidden="true">📊</span>Hoje</button>
+    <button data-view="esteira" aria-label="Esteira"><span aria-hidden="true">🏃</span>Esteira</button>
+    <button data-view="comida" aria-label="Comida"><span aria-hidden="true">🍽️</span>Comida</button>
+    <button data-view="treino" aria-label="Treino"><span aria-hidden="true">🏋️</span>Treino</button>
+    <button data-view="perfil" aria-label="Perfil"><span aria-hidden="true">⚙️</span>Perfil</button>
+  </nav>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

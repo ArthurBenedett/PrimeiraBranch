@@ -1,0 +1,17 @@
+{
+  "name": "academia-app",
+  "version": "0.1.0",
+  "description": "App para melhorar a performance de quem treina: esteira intervalada, calorias por foto, treinos e progresso.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}
