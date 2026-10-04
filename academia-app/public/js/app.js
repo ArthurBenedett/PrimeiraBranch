@@ -17,7 +17,11 @@ function abrir(nome) {
   });
   telas[nome]();
   window.scrollTo(0, 0);
-  if (location.hash !== `#${nome}`) history.replaceState(null, "", `#${nome}`);
+  try {
+    if (location.hash !== `#${nome}`) history.replaceState(null, "", `#${nome}`);
+  } catch {
+    /* ambiente que bloqueia o histórico (iframe isolado) */
+  }
 }
 
 $("#tabs").addEventListener("click", (e) => {
