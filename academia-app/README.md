@@ -35,6 +35,17 @@ Abra `http://IP-DO-SEU-COMPUTADOR:3000` com o celular na mesma rede. O botão de
 Para **instalar como app**, **manter a tela ligada** e usar o modo offline, o navegador exige HTTPS (ou `localhost`):
 publique em um serviço com HTTPS ou use um túnel.
 
+## Calorias por foto: preciso de uma API?
+
+Sim. A análise usa a API do Claude, que tem chave própria e cobrança por uso (diferente da assinatura do claude.ai).
+Crie a chave em https://console.anthropic.com e coloque em `.env` como `ANTHROPIC_API_KEY`. Sem ela o app abre normalmente e oferece o cadastro manual.
+Se a IA errar o alimento, digite o que é no campo "Errou?" e toque em **Reanalisar**.
+
+## Visual
+
+Fundo giz e tinta de borracha (claro e escuro automático). As cores seguem as anilhas de competição:
+vermelho = forte, verde = leve, amarelo = aquecimento, azul = desaquecimento. Veja `DESIGN.md`.
+
 ## Limitações
 
 - O alarme depende do app estar aberto. Com a tela bloqueada, navegadores móveis podem pausar os bipes
@@ -47,5 +58,6 @@ publique em um serviço com HTTPS ou use um túnel.
 ```
 server.js            servidor: arquivos estáticos + POST /api/analisar-comida (Claude com visão)
 public/js/logic.js   lógica pura (esteira, calorias, 1RM, metas), coberta por test/
+public/css, fonts    visual (Barlow, licença OFL em public/fonts)
 public/js/*.js       telas: esteira, comida, treino, hoje, perfil + alarmes e armazenamento
 ```

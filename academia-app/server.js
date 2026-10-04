@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
+import { SYSTEM_PROMPT, FOOD_SCHEMA } from "./prompt-comida.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(here, "public");
@@ -16,41 +17,6 @@ const RATE_LIMIT = { janelaMs: 60_000, max: 20 };
 
 carregarEnv();
 const client = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
-
-const SYSTEM_PROMPT = `Você é um nutricionista esportivo que estima as calorias de refeições a partir de fotos, para pessoas que treinam.
-- Identifique cada alimento visível separadamente (ex.: arroz, feijão, frango grelhado, salada).
-- Estime a porção pelo tamanho aparente no prato, usando como referência prato, talheres e mãos quando houver. Informe a porção em gramas ou unidades (ex.: "150 g", "2 fatias").
-- Dê calorias (kcal) e macros (gramas) de cada alimento para a porção estimada, com valores inteiros ou com uma casa decimal.
-- Considere preparo visível (frito, com molho, óleo, queijo derretido), pois muda bem as calorias.
-- Se o usuário informar quantidades ou detalhes, priorize essa informação sobre o que você estimou pela imagem.
-- Se a imagem não tiver comida, devolva a lista de alimentos vazia e explique em "observacoes".
-- Escreva em português do Brasil. Seja honesto sobre a incerteza: use confianca "baixa" quando a porção ou os ingredientes forem difíceis de ver.`;
-
-const FOOD_SCHEMA = {
-  type: "object",
-  properties: {
-    alimentos: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          nome: { type: "string" },
-          porcao: { type: "string" },
-          calorias: { type: "number" },
-          proteina_g: { type: "number" },
-          carboidrato_g: { type: "number" },
-          gordura_g: { type: "number" },
-        },
-        required: ["nome", "porcao", "calorias", "proteina_g", "carboidrato_g", "gordura_g"],
-        additionalProperties: false,
-      },
-    },
-    confianca: { type: "string", enum: ["alta", "media", "baixa"] },
-    observacoes: { type: "string" },
-  },
-  required: ["alimentos", "confianca", "observacoes"],
-  additionalProperties: false,
-};
 
 const acessos = new Map(); // ip -> timestamps recentes
 
@@ -159,6 +125,7 @@ const TIPOS = {
   ".svg": "image/svg+xml",
   ".webmanifest": "application/manifest+json",
   ".png": "image/png",
+  ".woff2": "font/woff2",
 };
 
 function arquivoEstatico(req, res, url) {

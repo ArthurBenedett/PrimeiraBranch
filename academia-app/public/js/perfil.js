@@ -1,56 +1,62 @@
 // Perfil: metas, sugestão automática, preferências de alarme e backup.
 import { db, salvar, exportar, importar, apagarTudo } from "./storage.js";
 import { sugerirMetas } from "./logic.js";
-import { $, $$, esc, num, avisar, fmt } from "./util.js";
+import { $, $$, esc, num, avisar, fmt, icone } from "./util.js";
 
 const raiz = () => $("#view-perfil");
 
 export function renderPerfil() {
   const p = db.perfil;
   raiz().innerHTML = `
-    <h1>Perfil e metas</h1>
-    <p class="sub">Usado para calcular calorias da esteira e as metas do dia.</p>
+    <h1>Perfil</h1>
+    <p class="sub">Seus dados calculam as calorias da esteira e as metas do dia.</p>
 
-    <form class="card" id="form-perfil" autocomplete="off">
-      <h2>Seus dados</h2>
-      <div class="grade">
-        <div><label for="p-peso">Peso (kg)</label><input id="p-peso" name="pesoKg" type="number" inputmode="decimal" step="0.1" min="20" max="400" value="${p.pesoKg ?? ""}"></div>
-        <div><label for="p-alt">Altura (cm)</label><input id="p-alt" name="alturaCm" type="number" inputmode="numeric" min="100" max="250" value="${p.alturaCm ?? ""}"></div>
-        <div><label for="p-idade">Idade</label><input id="p-idade" name="idade" type="number" inputmode="numeric" min="12" max="100" value="${p.idade ?? ""}"></div>
-        <div><label for="p-sexo">Sexo</label><select id="p-sexo" name="sexo"><option value="m" ${p.sexo === "m" ? "selected" : ""}>Masculino</option><option value="f" ${p.sexo === "f" ? "selected" : ""}>Feminino</option></select></div>
-        <div><label for="p-ativ">Nível de atividade</label><select id="p-ativ" name="atividade">
-          ${[[1.2, "Sedentário"], [1.375, "Leve (1–3x/sem)"], [1.55, "Moderado (3–5x/sem)"], [1.725, "Intenso (6–7x/sem)"]]
-            .map(([v, t]) => `<option value="${v}" ${p.atividade === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
-        <div><label for="p-obj">Objetivo</label><select id="p-obj" name="objetivo">
-          ${[["cortar", "Perder gordura"], ["manter", "Manter"], ["ganhar", "Ganhar massa"]]
-            .map(([v, t]) => `<option value="${v}" ${p.objetivo === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
-      </div>
-      <button type="button" class="mini" id="b-sugerir" style="margin-top:10px">✨ Sugerir metas com esses dados</button>
+    <form id="form-perfil" autocomplete="off">
+      <section class="bloco">
+        <h2>Seus dados</h2>
+        <div class="grade" style="margin-top:16px">
+          <div><label for="p-peso">Peso (kg)</label><input id="p-peso" name="pesoKg" type="number" inputmode="decimal" step="0.1" min="20" max="400" value="${p.pesoKg ?? ""}"></div>
+          <div><label for="p-alt">Altura (cm)</label><input id="p-alt" name="alturaCm" type="number" inputmode="numeric" min="100" max="250" value="${p.alturaCm ?? ""}"></div>
+          <div><label for="p-idade">Idade</label><input id="p-idade" name="idade" type="number" inputmode="numeric" min="12" max="100" value="${p.idade ?? ""}"></div>
+          <div><label for="p-sexo">Sexo</label><select id="p-sexo" name="sexo"><option value="m" ${p.sexo === "m" ? "selected" : ""}>Masculino</option><option value="f" ${p.sexo === "f" ? "selected" : ""}>Feminino</option></select></div>
+          <div><label for="p-ativ">Treinos por semana</label><select id="p-ativ" name="atividade">
+            ${[[1.2, "Sedentário"], [1.375, "Leve (1–3×)"], [1.55, "Moderado (3–5×)"], [1.725, "Intenso (6–7×)"]]
+              .map(([v, t]) => `<option value="${v}" ${p.atividade === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+          <div><label for="p-obj">Objetivo</label><select id="p-obj" name="objetivo">
+            ${[["cortar", "Perder gordura"], ["manter", "Manter"], ["ganhar", "Ganhar massa"]]
+              .map(([v, t]) => `<option value="${v}" ${p.objetivo === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+        </div>
+      </section>
 
-      <h2 style="margin-top:18px">Metas diárias</h2>
-      <div class="grade grade3">
-        <div><label for="p-kcal">Calorias</label><input id="p-kcal" name="metaKcal" type="number" inputmode="numeric" min="800" max="8000" value="${p.metaKcal}"></div>
-        <div><label for="p-prot">Proteína (g)</label><input id="p-prot" name="metaProteina" type="number" inputmode="numeric" min="0" max="500" value="${p.metaProteina}"></div>
-        <div><label for="p-agua">Água (ml)</label><input id="p-agua" name="metaAguaMl" type="number" inputmode="numeric" min="500" max="10000" step="250" value="${p.metaAguaMl}"></div>
-      </div>
+      <section class="bloco">
+        <div class="linha espaco baixo"><h2>Metas diárias</h2>
+          <button type="button" class="mini" id="b-sugerir">Sugerir pelos meus dados</button></div>
+        <div class="grade grade3" style="margin-top:16px">
+          <div><label for="p-kcal">Calorias</label><input id="p-kcal" name="metaKcal" type="number" inputmode="numeric" min="800" max="8000" value="${p.metaKcal}"></div>
+          <div><label for="p-prot">Proteína (g)</label><input id="p-prot" name="metaProteina" type="number" inputmode="numeric" min="0" max="500" value="${p.metaProteina}"></div>
+          <div><label for="p-agua">Água (ml)</label><input id="p-agua" name="metaAguaMl" type="number" inputmode="numeric" min="500" max="10000" step="250" value="${p.metaAguaMl}"></div>
+        </div>
+      </section>
 
-      <h2 style="margin-top:18px">Alarmes</h2>
-      <div class="linha"><input type="checkbox" id="p-som" name="som" ${p.som ? "checked" : ""} style="width:22px;min-height:22px"><label for="p-som" style="margin:0">Bipes</label></div>
-      <div class="linha" style="margin-top:8px"><input type="checkbox" id="p-voz" name="voz" ${p.voz ? "checked" : ""} style="width:22px;min-height:22px"><label for="p-voz" style="margin:0">Voz avisando as trocas de ritmo</label></div>
+      <section class="bloco">
+        <h2>Alarmes da esteira</h2>
+        <div class="switch" style="margin-top:12px"><input type="checkbox" id="p-som" name="som" ${p.som ? "checked" : ""}><label for="p-som">Bipes</label></div>
+        <div class="switch"><input type="checkbox" id="p-voz" name="voz" ${p.voz ? "checked" : ""}><label for="p-voz">Voz avisando as trocas de ritmo</label></div>
+      </section>
 
-      <button class="primario grande" style="margin-top:16px">Salvar</button>
+      <button class="primario grande">Salvar</button>
     </form>
 
-    <div class="card">
-      <h2>Seus dados</h2>
-      <p class="peq suave">Tudo fica salvo só neste aparelho. Faça backup de vez em quando.</p>
+    <section class="bloco" style="margin-top:32px">
+      <h2>Backup</h2>
+      <p class="peq suave" style="margin:10px 0 14px;max-width:44ch">Tudo fica salvo só neste aparelho. Exporte um backup de vez em quando.</p>
       <div class="linha quebra">
-        <button class="mini" id="b-exp">⬇ Exportar backup</button>
-        <button class="mini" id="b-imp">⬆ Importar backup</button>
+        <button class="mini" id="b-exp">${icone("baixar", "sm")}Exportar</button>
+        <button class="mini" id="b-imp">${icone("subir", "sm")}Importar</button>
         <button class="mini perigo" id="b-apagar">Apagar tudo</button>
       </div>
       <input type="file" id="arq-imp" accept="application/json,.json" hidden>
-    </div>
+    </section>
   `;
 
   const form = $("#form-perfil");

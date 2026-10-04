@@ -1,4 +1,4 @@
-import { $, $$ } from "./util.js";
+import { $, $$, icone } from "./util.js";
 import { renderHoje } from "./hoje.js";
 import { renderEsteira } from "./esteira.js";
 import { renderComida } from "./comida.js";
@@ -6,6 +6,9 @@ import { renderTreino } from "./treino.js";
 import { renderPerfil } from "./perfil.js";
 
 const telas = { hoje: renderHoje, esteira: renderEsteira, comida: renderComida, treino: renderTreino, perfil: renderPerfil };
+
+const ABAS = [["hoje", "Hoje"], ["esteira", "Esteira"], ["comida", "Comida"], ["treino", "Treino"], ["perfil", "Perfil"]];
+$("#tabs").innerHTML = ABAS.map(([id, nome]) => `<button data-view="${id}" aria-label="${nome}">${icone(id)}${nome}</button>`).join("");
 
 function abrir(nome) {
   if (!telas[nome]) nome = "hoje";

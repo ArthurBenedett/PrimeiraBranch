@@ -1,7 +1,7 @@
 // Treino: registro de séries, recordes (PR) e cronômetro de descanso com alarme.
 import { db, salvar, novoId } from "./storage.js";
 import { estimar1RM, melhor1RM, volume, chaveData, formatarTempo, ultimosDias } from "./logic.js";
-import { $, $$, esc, num, avisar, fmt } from "./util.js";
+import { $, $$, esc, num, avisar, fmt, icone } from "./util.js";
 import { destravarAudio, alarmeFim, alarmeContagem, falar } from "./alarme.js";
 
 const EXERCICIOS = ["Supino reto", "Supino inclinado", "Agachamento", "Leg press", "Levantamento terra", "Desenvolvimento",
@@ -22,43 +22,42 @@ export function renderTreino() {
 
   raiz().innerHTML = `
     <h1>Treino</h1>
-    <p class="sub">Registre as séries, acompanhe recordes e controle o descanso.</p>
+    <p class="sub">Registre as séries, acompanhe os recordes e controle o descanso.</p>
 
-    <form class="card" id="form-serie" autocomplete="off">
-      <h2>Nova série</h2>
+    <form id="form-serie" autocomplete="off">
       <label for="t-ex">Exercício</label>
       <input id="t-ex" list="lista-ex" required maxlength="60" value="${esc(ultimoExercicio)}" placeholder="Ex.: Supino reto">
       <datalist id="lista-ex">${nomes.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
-      <div class="grade" style="margin-top:8px">
+      <div class="grade" style="margin-top:14px">
         <div><label for="t-carga">Carga (kg)</label><input id="t-carga" type="number" inputmode="decimal" min="0" step="0.5" required></div>
         <div><label for="t-reps">Repetições</label><input id="t-reps" type="number" inputmode="numeric" min="1" max="100" step="1" required></div>
       </div>
-      <div class="linha" style="margin-top:8px">
-        <input type="checkbox" id="t-auto" checked style="width:22px;min-height:22px">
-        <label for="t-auto" style="margin:0">Iniciar descanso automaticamente</label>
+      <div class="switch" style="margin-top:8px">
+        <input type="checkbox" id="t-auto" checked><label for="t-auto">Iniciar o descanso automaticamente</label>
       </div>
-      <p id="t-dica" class="peq suave" style="min-height:1.2em"></p>
-      <button class="primario grande">＋ Registrar série</button>
+      <p id="t-dica" class="dica-linha"></p>
+      <button class="primario grande" style="margin-top:8px">${icone("mais")}Registrar série</button>
     </form>
 
-    <div class="card">
+    <section class="bloco" style="margin-top:28px">
       <h2>Descanso</h2>
-      <div class="descanso" id="d-tempo">${descanso ? formatarTempo((descanso.fimEm - Date.now()) / 1000) : "00:00"}</div>
-      <div class="linha quebra" style="justify-content:center;margin:10px 0">
-        ${[45, 60, 90, 120, 180].map((s) => `<button class="mini" data-desc="${s}">${formatarTempo(s)}</button>`).join("")}
+      <div class="relogio-descanso" id="d-tempo" style="margin:14px 0" aria-live="off">${descanso ? formatarTempo((descanso.fimEm - Date.now()) / 1000) : "00:00"}</div>
+      <div class="descansos">
+        ${[45, 60, 90, 120, 180].map((s) => `<button class="chip" data-desc="${s}">${formatarTempo(s)}</button>`).join("")}
       </div>
-      <button class="grande" id="d-parar" ${descanso ? "" : "hidden"}>Parar descanso</button>
-    </div>
+      <button class="grande" id="d-parar" ${descanso ? "" : "hidden"}>${icone("parar")}Parar descanso</button>
+    </section>
 
-    <div class="card">
-      <div class="linha espaco"><h2>Hoje</h2><span class="suave peq">${hoje.length} séries · ${fmt(volume(hoje))} kg de volume</span></div>
+    <section class="bloco">
+      <div class="linha espaco baixo" style="margin-bottom:8px"><h2>Hoje</h2><span class="suave peq">${hoje.length} séries · ${fmt(volume(hoje))} kg de volume</span></div>
       ${grupos.size ? [...grupos].map(([ex, ss]) => `
-        <div style="margin-bottom:10px"><b>${esc(ex)}</b>
-          ${ss.map((s, i) => `<div class="serie"><span>${i + 1}ª · ${fmt(s.carga, 1)} kg × ${s.reps}${s.pr ? '<span class="pr">PR</span>' : ""}</span>
-            <span class="suave peq">1RM ≈ ${fmt(estimar1RM(s.carga, s.reps), 1)} kg
-            <button class="mini fantasma perigo" data-del="${s.id}" aria-label="Apagar série">🗑</button></span></div>`).join("")}
-        </div>`).join("") : `<p class="suave">Nenhuma série hoje. Bora treinar!</p>`}
-    </div>
+        <div style="margin-bottom:18px"><h3 style="margin:14px 0 4px">${esc(ex)}</h3>
+          ${ss.map((s, i) => `<div class="serie"><span class="n">${i + 1}</span>
+            <span class="carga">${fmt(s.carga, 1)}<small> kg</small> × ${s.reps}${s.pr ? '<span class="pr">PR</span>' : ""}</span>
+            <span class="rm">1RM ≈ ${fmt(estimar1RM(s.carga, s.reps), 1)} kg</span>
+            <button class="icone" data-del="${s.id}" aria-label="Apagar série">${icone("lixo", "sm")}</button></div>`).join("")}
+        </div>`).join("") : `<p class="vazio">Nenhuma série hoje. Escolha um exercício acima e registre a primeira.</p>`}
+    </section>
     ${semanaHtml()}
   `;
 
@@ -81,12 +80,12 @@ function semanaHtml() {
   const dias = ultimosDias(7);
   const vols = dias.map((d) => volume(db.series.filter((s) => s.data === d)));
   const max = Math.max(...vols, 1);
-  const nomes = ["D", "S", "T", "Q", "Q", "S", "S"];
-  return `<div class="card"><h2>Volume da semana</h2>
-    <div style="display:flex;align-items:flex-end;gap:6px;height:90px" role="img" aria-label="Volume por dia nos últimos 7 dias">
-      ${vols.map((v, i) => `<div style="flex:1;text-align:center"><div style="height:${Math.max(3, (v / max) * 70)}px;background:${v ? "var(--acento)" : "var(--linha)"};border-radius:4px"></div>
-        <span class="peq suave">${nomes[new Date(dias[i] + "T00:00").getDay()]}</span></div>`).join("")}
-    </div></div>`;
+  const nomes = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  return `<section class="bloco"><div class="linha espaco baixo" style="margin-bottom:14px"><h2>Volume da semana</h2><span class="suave peq">pico ${fmt(Math.max(...vols))} kg</span></div>
+    <div class="barras" role="img" aria-label="Volume de treino por dia nos últimos 7 dias">
+      ${vols.map((v, i) => `<div class="${i === vols.length - 1 ? "hoje" : ""}"><i class="${v ? "" : "zero"}" style="height:${v ? Math.max(4, (v / max) * 88) : 3}px"></i>
+        <span>${nomes[new Date(dias[i] + "T00:00").getDay()]}</span></div>`).join("")}
+    </div></section>`;
 }
 
 function dica() {
